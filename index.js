@@ -20,10 +20,10 @@ con.connect(function(err) {
 });
 
 
-const getID = function(table){
+const getID = function(table,column){
     return new Promise((res,rej) => {
 
-        const query = `SELECT COUNT(*) AS COUNT FROM ${table}`;
+        const query = `SELECT MAX(${column}) AS COUNT FROM ${table}`;
 
         con.query(query, (err,result) =>{
             res(result);
@@ -130,8 +130,8 @@ app.post("/post", async (req,res)=>{
     const lastName = req.body.lastName;
     const content = req.body.content;
     
-    const newPostId = await getID("post");
-    const newAuthorId = await getID("author");
+    const newPostId = await getID("post","POST_ID");
+    const newAuthorId = await getID("author","AU_ID");
 
     const authorQuery = `INSERT INTO author(AU_ID,AU_FNAME,AU_LNAME)
                          VALUES(${Number(newAuthorId[0].COUNT)+1}, "${firstName}", "${lastName}")`;
@@ -158,10 +158,6 @@ app.delete("/:post_id", async (req,res) => {
     res.send(result);
 
 });
-
-
-
-
 
 app.listen(8443, ()=>{
 
