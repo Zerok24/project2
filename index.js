@@ -39,7 +39,6 @@ const getPost = function(id){
             if(err){
                 console.log("Here");
             }
-            console.log(results);
             resolve(results);
         });
     })
@@ -60,9 +59,7 @@ const getAll = function(){
                     content: respon[i].CONTENT,
                     likes: respon[i].LIKES
                 });
-
             }
-
             resolve(finalResult);
         });
 
