@@ -98,14 +98,13 @@ app.get("/posts/:post_id", async (req,res)=>{
 
     const id = req.params.post_id;
     const post = await getPost(id);
-    console.log(post);
     const author = await getAuthor(post[0].AU_ID);
     const result = [];
 
     result.push({
         author:  author[0].AU_FNAME + " " +author[0].AU_LNAME,
         content: post[0].CONTENT,
-        like: post[0].LIKES
+        likes: post[0].LIKES
     });
     res.send(result);
 
@@ -123,7 +122,7 @@ app.patch("/:post_id/like", async (req,res)=>{
     result.push({
         author:  author[0].AU_FNAME + " " +author[0].AU_LNAME,
         content: post[0].CONTENT,
-        like: post[0].LIKES
+        likes: post[0].LIKES
     });
     res.send(result);
 
