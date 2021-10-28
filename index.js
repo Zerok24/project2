@@ -1,3 +1,4 @@
+'use strict';
 const express = require('express');
 var mysql = require('mysql');
 
@@ -35,7 +36,10 @@ const getID = function(table,column){
 const getPost = function(id){
     return new Promise(function(resolve,reject){
         con.query(`SELECT * FROM post WHERE POST_ID = ${id}`, (err,results,fields)=>{
-
+            if(err){
+                console.log("Here");
+            }
+            console.log(results);
             resolve(results);
         });
     })
@@ -90,10 +94,11 @@ app.get("/posts", async (req,res)=>{
     
 });
 
-app.get("/:post_id", async (req,res)=>{
+app.get("/posts/:post_id", async (req,res)=>{
 
     const id = req.params.post_id;
     const post = await getPost(id);
+    console.log(post);
     const author = await getAuthor(post[0].AU_ID);
     const result = [];
 
