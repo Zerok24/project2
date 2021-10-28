@@ -90,6 +90,9 @@ app.get("/posts", async (req,res)=>{
     res.send(posts);
     
 });
+app.get("/report.html", (req,res)=>{
+    res.sendFile(__dirname+"/report.html");
+});
 
 app.get("/posts/:post_id", async (req,res)=>{
 
