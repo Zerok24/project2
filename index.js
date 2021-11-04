@@ -11,6 +11,12 @@ const credentials = JSON.parse(json);
 app.use(express.json());
 app.use(express.urlencoded({extended:false}));
 
+app.options('*', (request, response) => {
+    response.set('Access-Control-Allow-Headers', 'Content-Type');
+    response.set('Access-Control-Allow-Methods', 'GET,POST,PATCH,DELETE');
+    response.sendStatus(200);
+});
+
 const con = mysql.createConnection(credentials);
 
 con.connect(function(err) {
