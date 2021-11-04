@@ -1,19 +1,17 @@
 'use strict';
 const express = require('express');
-var mysql = require('mysql');
+const mysql = require('mysql');
+const fs = require('fs');
 
 const app = express();
 
+const json = fs.readFileSync('credentials.json', 'utf8');
+const credentials = JSON.parse(json);
 
 app.use(express.json());
 app.use(express.urlencoded({extended:false}));
 
-var con = mysql.createConnection({
-    host: "localhost",
-    user: "root",
-    password: "Eltunas123!",
-    database: "blog"
-});
+const con = mysql.createConnection(credentials);
 
 con.connect(function(err) {
     if (err) throw err;
