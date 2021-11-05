@@ -41,16 +41,17 @@ const getPost = function(id){
     return new Promise(function(resolve,reject){
         con.query(`SELECT * FROM post WHERE POST_ID = ${id}`, (err,results,fields)=>{
             if(err){
-                console.log("Here");
+                reject();
             }
             resolve(results);
         });
+        reject("No post with that id");
     })
 };
 
 const getAll = function(){
     return new Promise((resolve,reject) => {
-        const que = `SELECT blog.author.AU_FNAME, blog.author.AU_LNAME, blog.post.CONTENT, blog.post.LIKES
+        const que = `SELECT blog.post.POST_ID, blog.author.AU_FNAME, blog.author.AU_LNAME, blog.post.CONTENT, blog.post.LIKES
                      FROM blog.post
                      INNER JOIN blog.author ON blog.post.AU_ID = blog.author.AU_ID;`;
         con.query(que, (error,respon,fiel) =>{
@@ -59,6 +60,7 @@ const getAll = function(){
             for(let i = 0; i < respon.length; i++){
                 finalResult.push(
                 {
+                    id:respon[i].POST_ID,
                     author: respon[i].AU_FNAME + " " + respon[i].AU_LNAME,
                     content: respon[i].CONTENT,
                     likes: respon[i].LIKES
@@ -66,6 +68,7 @@ const getAll = function(){
             }
             resolve(finalResult);
         });
+        reject();
 
     });
 }
@@ -101,11 +104,18 @@ app.get("/report.html", (req,res)=>{
 app.get("/posts/:post_id", async (req,res)=>{
 
     const id = req.params.post_id;
-    const post = await getPost(id);
-    const author = await getAuthor(post[0].AU_ID);
+    const post = await getPost(id).catch(err=>{
+        res.send({
+            ok:false,
+            message: err
+        });
+        return;
+    });
+    const author = await getAuthor(post[0].AU_ID)
     const result = [];
 
     result.push({
+        id:post[0].POST_ID,
         author:  author[0].AU_FNAME + " " +author[0].AU_LNAME,
         content: post[0].CONTENT,
         likes: post[0].LIKES
@@ -118,6 +128,7 @@ app.patch("/:post_id/like", async (req,res)=>{
     const id = Number(req.params.post_id);
 
     con.query(`UPDATE post SET LIKES = LIKES + 1 WHERE POST_ID = ${id}`);
+
 
     const post = await getPost(id);
     const author = await getAuthor(post[0].AU_ID);
