@@ -42,10 +42,12 @@ const getPost = function(id){
         con.query(`SELECT * FROM post WHERE POST_ID = ${id}`, (err,results,fields)=>{
             if(err){
                 reject();
+            }else if(results.length === 0){
+
+                reject("No post with that id");
             }
-            resolve(results);
+                resolve(results);
         });
-        reject("No post with that id");
     })
 };
 
@@ -68,7 +70,7 @@ const getAll = function(){
             }
             resolve(finalResult);
         });
-        reject();
+        // reject();
 
     });
 }
@@ -93,7 +95,7 @@ const getAuthor = function(id){
 
 app.get("/posts", async (req,res)=>{
 
-    const posts = await(getAll());
+    const posts = await getAll().catch(err => res.json({ok:false, message: "error getting posts"}));
     res.send(posts);
     
 });
@@ -103,24 +105,25 @@ app.get("/report.html", (req,res)=>{
 
 app.get("/posts/:post_id", async (req,res)=>{
 
-    const id = req.params.post_id;
-    const post = await getPost(id).catch(err=>{
-        res.send({
-            ok:false,
-            message: err
+    try {
+        const id = req.params.post_id;
+        const post = await getPost(id);
+        const author = await getAuthor(post[0].AU_ID)
+        
+        const result = [];
+        result.push({
+            id:post[0].POST_ID,
+            author:  author[0].AU_FNAME + " " +author[0].AU_LNAME,
+            content: post[0].CONTENT,
+            likes: post[0].LIKES
         });
-        return;
-    });
-    const author = await getAuthor(post[0].AU_ID)
-    const result = [];
+        res.send(result);
 
-    result.push({
-        id:post[0].POST_ID,
-        author:  author[0].AU_FNAME + " " +author[0].AU_LNAME,
-        content: post[0].CONTENT,
-        likes: post[0].LIKES
-    });
-    res.send(result);
+    } catch (error) {
+        res.send({ok:false,message:error});
+        return;
+    }
+
 
 });
 
@@ -129,17 +132,21 @@ app.patch("/:post_id/like", async (req,res)=>{
 
     con.query(`UPDATE post SET LIKES = LIKES + 1 WHERE POST_ID = ${id}`);
 
+    try {
+        const post = await getPost(id);
+        const author = await getAuthor(post[0].AU_ID);
+        const result = [];
 
-    const post = await getPost(id);
-    const author = await getAuthor(post[0].AU_ID);
-    const result = [];
+        result.push({
+            author:  author[0].AU_FNAME + " " +author[0].AU_LNAME,
+            content: post[0].CONTENT,
+            likes: post[0].LIKES
+        });
+        res.send(result);
+    } catch (error) {
+        res.send({ok:false,message:error});
+    }
 
-    result.push({
-        author:  author[0].AU_FNAME + " " +author[0].AU_LNAME,
-        content: post[0].CONTENT,
-        likes: post[0].LIKES
-    });
-    res.send(result);
 
 });
 
