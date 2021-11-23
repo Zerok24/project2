@@ -53,7 +53,7 @@ const getPost = function(id){
 
 const getAll = function(){
     return new Promise((resolve,reject) => {
-        const que = `SELECT blog.post.POST_ID, blog.author.AU_FNAME, blog.author.AU_LNAME, blog.post.CONTENT, blog.post.LIKES
+        const que = `SELECT blog.post.POST_ID, blog.author.AU_FNAME, blog.author.AU_LNAME, blog.post.TITLE , blog.post.CONTENT, blog.post.LIKES
                      FROM blog.post
                      INNER JOIN blog.author ON blog.post.AU_ID = blog.author.AU_ID;`;
         con.query(que, (error,respon,fiel) =>{
@@ -64,13 +64,13 @@ const getAll = function(){
                 {
                     id:respon[i].POST_ID,
                     author: respon[i].AU_FNAME + " " + respon[i].AU_LNAME,
+                    title: respon[i].TITLE ,
                     content: respon[i].CONTENT,
                     likes: respon[i].LIKES
                 });
             }
             resolve(finalResult);
         });
-        // reject();
 
     });
 }
@@ -114,8 +114,9 @@ app.get("/posts/:post_id", async (req,res)=>{
         result.push({
             id:post[0].POST_ID,
             author:  author[0].AU_FNAME + " " +author[0].AU_LNAME,
+            title: post[0].TITLE,
             content: post[0].CONTENT,
-            likes: post[0].LIKES
+            likes: post[0].LIKES 
         });
         res.send(result);
 
@@ -138,7 +139,9 @@ app.patch("/:post_id/like", async (req,res)=>{
         const result = [];
 
         result.push({
+            id: post[0].POST_ID ,
             author:  author[0].AU_FNAME + " " +author[0].AU_LNAME,
+            title: post[0].TITLE,
             content: post[0].CONTENT,
             likes: post[0].LIKES
         });
@@ -155,6 +158,7 @@ app.post("/post", async (req,res)=>{
     const firstName = req.body.firstName;
     const lastName = req.body.lastName;
     const content = req.body.content;
+    const title = req.body.title;
     
     const newPostId = await getID("post","POST_ID");
     const newAuthorId = await getID("author","AU_ID");
@@ -162,8 +166,8 @@ app.post("/post", async (req,res)=>{
     const authorQuery = `INSERT INTO author(AU_ID,AU_FNAME,AU_LNAME)
                          VALUES(${Number(newAuthorId[0].COUNT)+1}, "${firstName}", "${lastName}")`;
 
-    const postQuery = `INSERT INTO post(POST_ID,AU_ID,CONTENT,LIKES)
-                       VALUES(${Number(newPostId[0].COUNT) + 1}, ${Number(newAuthorId[0].COUNT)+1}, "${content}", 0)`;
+    const postQuery = `INSERT INTO post(POST_ID,AU_ID,CONTENT,LIKES,TITLE)
+                       VALUES(${Number(newPostId[0].COUNT) + 1}, ${Number(newAuthorId[0].COUNT)+1}, "${content}", 0,"${title}")`;
     
     
     con.query(authorQuery);
