@@ -11,10 +11,10 @@ const credentials = JSON.parse(json);
 app.use(express.json());
 app.use(express.urlencoded({extended:false}));
 
-// service.use((request, response, next) => {
-//     response.set('Access-Control-Allow-Origin', '*');
-//     next();
-// });
+app.use((request, response, next) => {
+    response.set('Access-Control-Allow-Origin', '*');
+    next();
+});
 
 app.options('*', (request, response) => {
     response.set('Access-Control-Allow-Headers', 'Content-Type');
